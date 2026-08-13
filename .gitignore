@@ -1,0 +1,8 @@
+# build artifacts
+/bin/
+*.test
+*.out
+
+# editor noise
+.idea/
+.vscode/
