@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ["1.21", "1.26"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: true
+      - name: Formatting
+        run: test -z "$(gofmt -l .)"
+      - name: Vet
+        run: |
+          go vet ./...
+          go vet -tags herr_trace ./...
+      - name: Test
+        run: go test ./...
+      - name: Test (trace build)
+        run: go test -tags herr_trace ./...
+      - name: Test (race detector)
+        run: go test -race ./...
+      - name: zap submodule
+        working-directory: zap
+        run: |
+          go test ./...
+          go vet ./...
+      - name: bench submodule (compile)
+        working-directory: bench
+        run: go test ./...
